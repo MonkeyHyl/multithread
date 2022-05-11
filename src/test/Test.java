@@ -1,26 +1,35 @@
 package test;
 
-import service.Service;
+import service.Subject;
+import service.impl.ReadSubject;
+
+import java.lang.reflect.*;
 
 public class Test {
     public static void main(String[] args) {
-        Service service = new Service();
-        Thread threadA = new Thread(() ->
-        {
-            for (int i = 0; i < Integer.MAX_VALUE; i++) {
-                service.get();
-            }
+        ReadSubject subject = new ReadSubject();
+        try {
+            Class<?> proxyClass = Proxy.getProxyClass(subject.getClass().getClassLoader(), subject.getClass());
+            Constructor<?> constructor = proxyClass.getConstructor(InvocationHandler.class);
+            Subject subjecta = (Subject) constructor.newInstance(
+                    (InvocationHandler) (proxy, method, args1) -> {
+                        System.out.println("aaaa");
+                        return null;
+                    }
+            );
+            subjecta.doSomething();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
         }
-        );
-        threadA.start();
-        Thread threadB = new Thread(() ->
-        {
-            for (int i = 0; i < Integer.MAX_VALUE; i++) {
-                service.set();
-            }
-        });
-        threadB.start();
 
 
     }
+
+
 }
